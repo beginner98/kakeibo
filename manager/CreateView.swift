@@ -5,7 +5,9 @@ struct CreateView: View {
     @State private var householdID = UUID().uuidString.prefix(16).lowercased() // 家計簿ID
     @State private var password = "" // パスワード
     @State private var errorMessage = "" // エラーメッセージ
-    @AppStorage("isJoined") private var isJoined = false // 参加状態を保持
+    @State private var isLoading = false // ローディング状態
+    @AppStorage("isJoined") private var isJoined = false
+    @AppStorage("householdID") private var savedHouseholdID = "" // 家計簿IDをAppStorageで保持
 
     var body: some View {
         VStack(spacing: 20) {
@@ -25,26 +27,18 @@ struct CreateView: View {
                     return
                 }
 
-                // Firestoreで家計簿IDがユニークか確認
-                FirebaseManager.shared.isHouseholdIDUnique(String(householdID)) { isUnique in
-                    if isUnique {
-                        // 家計簿を作成する処理
-                        FirebaseManager.shared.createHousehold(id: String(householdID), password: password) { error in
-                            if error == nil {
-                                // 家計簿の作成成功後、ホーム画面に移動
-                                isJoined = true
-                                navigateToHome()
-                            } else {
-                                errorMessage = "エラーが発生しました。再試行してください。"
-                            }
-                        }
-                    } else {
-                        errorMessage = "指定されたIDは既に使用されています。別のIDを試してください。"
-                    }
-                }
+                isLoading = true
+                errorMessage = ""
+
+                createHousehold()
             }
             .buttonStyle(.borderedProminent)
-            .disabled(password.count < 8) // パスワードが8文字未満の場合ボタンを無効化
+            .disabled(password.count < 8 || isLoading)
+
+            // ローディング表示
+            if isLoading {
+                ProgressView()
+            }
 
             // エラーメッセージの表示
             if !errorMessage.isEmpty {
@@ -58,11 +52,43 @@ struct CreateView: View {
         .navigationTitle("家計簿の作成")
     }
     
-    // ホーム画面への遷移処理
-    private func navigateToHome() {
-        // ここでホーム画面への遷移処理を行います
-        // 通常はNavigationLinkやProgrammatic Navigationで画面遷移を行いますが、詳細は以下に記載します
-        // ここでは仮の遷移処理として、isJoinedをtrueにして画面を更新しています
+    /// 家計簿を作成する処理
+    private func createHousehold() {
+        // Firebase Authenticationでカスタム認証を使用
+        let email = "\(householdID)@shared-household.com" // 家計簿IDをメールアドレスの形式に変換
+        let hashedPassword = hashPassword(password) // パスワードをハッシュ化
+
+        // Firebase Authenticationに登録
+        Auth.auth().createUser(withEmail: email, password: hashedPassword) { authResult, error in
+            if let error = error {
+                errorMessage = "家計簿の作成に失敗しました: \(error.localizedDescription)"
+                isLoading = false
+                return
+            }
+
+            // Firestoreに家計簿データを保存
+            let householdData: [String: Any] = [
+                "householdID": String(householdID),
+                "passwordHash": hashedPassword,
+                "createdAt": Timestamp()
+            ]
+            Firestore.firestore().collection("households").document(String(householdID)).setData(householdData) { firestoreError in
+                if let firestoreError = firestoreError {
+                    errorMessage = "Firestoreへの保存に失敗しました: \(firestoreError.localizedDescription)"
+                } else {
+                    print("家計簿が正常に作成されました")
+                    savedHouseholdID = String(householdID) // 家計簿IDを保存
+                    isJoined = true // 参加済み状態にする
+                }
+                isLoading = false
+            }
+        }
+    }
+    
+    /// パスワードをハッシュ化する関数
+    private func hashPassword(_ password: String) -> String {
+        let data = Data(password.utf8)
+        let hash = data.map { String(format: "%02x", $0) }.joined()
+        return hash
     }
 }
-

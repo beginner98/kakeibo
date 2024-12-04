@@ -2,16 +2,14 @@ import FirebaseFirestore
 import FirebaseAuth
 import FirebaseStorage
 
-
 class FirebaseManager {
     static let shared = FirebaseManager()
     private let db = Firestore.firestore()
     private let storage = Storage.storage()
     private init() {}
-    
+
     // 家計簿IDがユニークかを確認
     func isHouseholdIDUnique(_ id: String, completion: @escaping (Bool) -> Void) {
-        let db = Firestore.firestore()
         db.collection("households").whereField("householdID", isEqualTo: id).getDocuments { (snapshot, error) in
             if let error = error {
                 print("エラーが発生しました: \(error.localizedDescription)")
@@ -24,58 +22,114 @@ class FirebaseManager {
 
     // 家計簿を作成する
     func createHousehold(id: String, password: String, completion: @escaping (Error?) -> Void) {
-        let db = Firestore.firestore()
+        guard let userID = Auth.auth().currentUser?.uid else {
+            completion(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "ユーザーが未ログインです"]))
+            return
+        }
         let householdRef = db.collection("households").document(id)
-        
         householdRef.setData([
             "householdID": id,
-            "password": password
+            "password": password,
+            "members": [userID] // 家計簿作成者を初期メンバーに追加
         ]) { error in
             completion(error)
         }
     }
-    
+
+    // 家計簿に参加する
     func joinHousehold(id: String, password: String, completion: @escaping (Bool) -> Void) {
-        db.collection("households").document(id).getDocument { snapshot, error in
-            guard let data = snapshot?.data(), let storedPassword = data["password"] as? String else {
-                completion(false)
-                return
-            }
-            completion(storedPassword == password)
-        }
-    }
-    
-    func addExpense(
-            householdID: String,
-            date: Date,
-            memo: String,
-            amount: Int,
-            category: String,
-            person: String,
-            paymentType: String,
-            imageData: Data?,
-            completion: @escaping (Bool) -> Void
-        ) {
-            let expenseData: [String: Any] = [
-                "date": date,
-                "memo": memo,
-                "amount": amount,
-                "category": category,
-                "person": person,
-                "paymentType": paymentType,
-                "imageData": imageData ?? Data() // 画像がない場合は空のData
-            ]
-            
-            // "Household" コレクション内の家計簿IDのドキュメントに保存
-            db.collection("households").document(householdID).collection("expenses").addDocument(data: expenseData) { error in
-                if let error = error {
-                    print("データ保存失敗: \(error.localizedDescription)")
+            db.collection("households").document(id).getDocument { snapshot, error in
+                guard let data = snapshot?.data(),
+                      let storedPasswordHash = data["passwordHash"] as? String else {
                     completion(false)
-                } else {
-                    print("データ保存成功")
+                    return
+                }
+
+                let inputPasswordHash = self.hashPassword(password)
+                if storedPasswordHash == inputPasswordHash {
                     completion(true)
+                } else {
+                    completion(false)
                 }
             }
         }
     
+    private func hashPassword(_ password: String) -> String {
+            let data = Data(password.utf8)
+            let hash = data.map { String(format: "%02x", $0) }.joined()
+            return hash
+        }
+
+    // 出費を追加する
+    func addExpense(
+        householdID: String,
+        date: Date,
+        memo: String,
+        amount: Int,
+        category: String,
+        person: String,
+        paymentType: String,
+        imageData: Data?,
+        completion: @escaping (Bool) -> Void
+    ) {
+        guard let userID = Auth.auth().currentUser?.uid else {
+            completion(false)
+            return
+        }
+        let expenseData: [String: Any] = [
+            "date": date,
+            "memo": memo,
+            "amount": amount,
+            "category": category,
+            "person": person,
+            "paymentType": paymentType,
+            "userID": userID,
+            "imageData": imageData ?? Data() // 画像がない場合は空のData
+        ]
+        // "Household" コレクション内の家計簿IDのドキュメントに保存
+        db.collection("households").document(householdID).collection("expenses").addDocument(data: expenseData) { error in
+            if let error = error {
+                print("データ保存失敗: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("データ保存成功")
+                completion(true)
+            }
+        }
+    }
+    
+    // 出費データを家計簿IDに基づいて取得
+    func getExpenses(forHouseholdID householdID: String, completion: @escaping ([Expense]) -> Void) {
+        db.collection("households")
+            .document(householdID)
+            .collection("expenses")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("データ取得失敗: \(error.localizedDescription)")
+                    completion([])
+                    return
+                }
+
+                var expenses: [Expense] = []
+                for document in snapshot?.documents ?? [] {
+                    let data = document.data()
+                    if let date = (data["date"] as? Timestamp)?.dateValue(),
+                       let person = data["person"] as? String,
+                       let amount = data["amount"] as? Int,
+                       let paymentType = data["paymentType"] as? String {
+                        let expense = Expense(
+                            id: document.documentID,
+                            date: date,
+                            person: person,
+                            amount: amount,
+                            paymentType: paymentType
+                        )
+                        expenses.append(expense)
+                    }
+                }
+                
+                completion(expenses)
+            }
+    }
+
 }
