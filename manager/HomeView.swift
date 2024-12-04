@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct HomeView: View {
+    // 追加画面を表示するための状態変数を宣言
     @State private var isShowingAddExpenseView = false
-    @State private var isShowingListView = false // リスト表示用の状態変数
-
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -23,14 +23,10 @@ struct HomeView: View {
                 }
 
                 // 家計簿一覧表示ボタン
-                Button("家計簿一覧") {
-                    isShowingListView = true
-                }
-                .buttonStyle(.borderedProminent)
-                .padding()
-                .sheet(isPresented: $isShowingListView) {
-                    // 家計簿一覧表示のシート表示
-                    ListView()
+                NavigationLink(destination: ListView()) {
+                    Text("家計簿一覧")
+                        .buttonStyle(.borderedProminent)
+                        .padding()
                 }
             }
         }

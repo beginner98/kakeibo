@@ -113,16 +113,24 @@ class FirebaseManager {
                 var expenses: [Expense] = []
                 for document in snapshot?.documents ?? [] {
                     let data = document.data()
+                    
+                    // date, person, amount, paymentType, category, memoの取得
                     if let date = (data["date"] as? Timestamp)?.dateValue(),
                        let person = data["person"] as? String,
                        let amount = data["amount"] as? Int,
-                       let paymentType = data["paymentType"] as? String {
+                       let paymentType = data["paymentType"] as? String,
+                       let category = data["category"] as? String, // 新しく追加された部分
+                       let memo = data["memo"] as? String { // 新しく追加された部分
+                        
+                        // categoryとmemoを追加したExpenseを作成
                         let expense = Expense(
                             id: document.documentID,
                             date: date,
                             person: person,
                             amount: amount,
-                            paymentType: paymentType
+                            paymentType: paymentType,
+                            category: category,  // 追加
+                            memo: memo           // 追加
                         )
                         expenses.append(expense)
                     }
@@ -131,5 +139,28 @@ class FirebaseManager {
                 completion(expenses)
             }
     }
+
+    func updateExpense(expenseID: String, householdID: String, updatedExpense: Expense, completion: @escaping (Bool) -> Void) {
+            let expenseRef = db.collection("households")
+                .document(householdID)
+                .collection("expenses")
+                .document(expenseID)
+            
+            let updatedData: [String: Any] = [
+                "category": updatedExpense.category,
+                "memo": updatedExpense.memo,
+                "amount": updatedExpense.amount
+            ]
+            
+            expenseRef.updateData(updatedData) { error in
+                if let error = error {
+                    print("データ更新失敗: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    print("データ更新成功")
+                    completion(true)
+                }
+            }
+        }
 
 }
