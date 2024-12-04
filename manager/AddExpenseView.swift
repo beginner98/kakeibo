@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseAuth
 
 struct AddExpenseView: View {
     @State private var date = Date()
@@ -12,6 +13,9 @@ struct AddExpenseView: View {
     let categories = ["食費", "交通費", "趣味", "その他"]
     let paymentTypes = ["割り勘", "立て替え"]
     let members = ["Person 1", "Person 2"]
+    
+    // Environment変数を使ってビューを閉じる
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(spacing: 20) {
@@ -58,23 +62,36 @@ struct AddExpenseView: View {
     }
 
     private func saveExpenseData() {
-        guard let amount = Int(amount) else { return }
+        // FirebaseAuth で現在のユーザーを確認
+        guard let user = Auth.auth().currentUser else {
+            print("ログインしていないため、データを保存できません")
+            return
+        }
+        
+        guard let amount = Int(amount) else {
+            print("金額の形式が正しくありません")
+            return
+        }
+        
+        // デバッグ用: ユーザー情報を確認
+        print("保存を実行するユーザー: \(user.uid)")
+
         FirebaseManager.shared.addExpense(
-            householdID: savedHouseholdID,  // 家計簿IDを渡す
+            householdID: savedHouseholdID,  // 共有の家計簿IDをそのまま使用
             date: date,
             memo: memo,
             amount: amount,
             category: selectedCategory,
             person: selectedPerson,
             paymentType: paymentType,
-            imageData: nil // 画像データなし
+            imageData: nil // 画像データは渡さない場合
         ) { success in
             if success {
                 print("データ保存成功")
+                dismiss()  // 保存後にHomeViewに戻る
             } else {
                 print("データ保存失敗")
             }
         }
-        
     }
 }
