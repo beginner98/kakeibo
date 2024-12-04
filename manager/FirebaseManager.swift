@@ -4,7 +4,7 @@ import FirebaseStorage
 
 class FirebaseManager {
     static let shared = FirebaseManager()
-    private let db = Firestore.firestore()
+    let db = Firestore.firestore()
     private let storage = Storage.storage()
     private init() {}
 
