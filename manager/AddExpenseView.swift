@@ -12,8 +12,7 @@ struct AddExpenseView: View {
     @AppStorage("user1Name") private var user1Name: String = "Person 1"
     @AppStorage("user2Name") private var user2Name: String = "Person 2"
     let categories = ["食費", "交通費", "趣味", "その他"]
-    let paymentTypes = ["割り勘", "立て替え"]
-
+    let paymentTypes = ["割り勘", "立て替え", "精算"]
     // `members`は計算プロパティで定義
     var members: [String] {
         [user1Name, user2Name]
@@ -22,7 +21,6 @@ struct AddExpenseView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-
         VStack(spacing: 20) {
             DatePicker("日付", selection: $date, displayedComponents: .date)
                 .datePickerStyle(WheelDatePickerStyle())
