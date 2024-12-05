@@ -17,7 +17,7 @@ struct HomeView: View {
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
                     ZStack{
-                        Color.white
+                        Color.offwhite
                         VStack{
                             HStack{
                                 Text(payfrom)
@@ -53,15 +53,18 @@ struct HomeView: View {
                     .frame(width: 320, height:250)
                     .cornerRadius(10)
                     
-                    Button("支出を追加/精算") {
+                    Button(action: {
                         isShowingAddExpenseView = true
+                    }) {
+                        ZStack {
+                            Color.pink
+                                .frame(width: 320, height: 120)
+                                .cornerRadius(10)
+                            Text("支出を追加/精算")
+                                .font(.system(size: 25))
+                                .foregroundStyle(.white)
+                        }
                     }
-                    .font(.system(size:25))
-                    .frame(width: 320, height: 120)
-                    .background(Color.pink)
-                    .foregroundStyle(.white)
-
-                    .cornerRadius(10)
                     .sheet(isPresented: $isShowingAddExpenseView) {
                         AddExpenseView()
                     }
@@ -72,7 +75,7 @@ struct HomeView: View {
                                 .frame(width: 124, height: 80)
                                 .buttonStyle(.borderedProminent)
                                 .padding()
-                                .background(Color.blue)
+                                .background(Color.gray)
                                 .foregroundStyle(.white)
                                 .cornerRadius(10)
                         }
@@ -83,7 +86,7 @@ struct HomeView: View {
                                 .frame(width: 124, height: 80)
                                 .buttonStyle(.borderedProminent)
                                 .padding()
-                                .background(Color.blue)
+                                .background(Color.gray)
                                 .foregroundStyle(.white)
                                 .cornerRadius(10)
                         }
