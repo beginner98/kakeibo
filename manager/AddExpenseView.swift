@@ -1,5 +1,10 @@
 import SwiftUI
 import FirebaseAuth
+import Combine
+
+extension Color {
+    static let offwhite = Color(red: 0.95, green: 0.95, blue: 0.95)
+}
 
 struct AddExpenseView: View {
     @State private var date = Date()
@@ -17,51 +22,104 @@ struct AddExpenseView: View {
     var members: [String] {
         [user1Name, user2Name]
     }
-    // Environment変数を使ってビューを閉じる
+
     @Environment(\.dismiss) private var dismiss
+    @State private var keyboardHeight: CGFloat = 0
+    @State private var keyboardPublisher: AnyCancellable?
+
 
     var body: some View {
-        VStack(spacing: 20) {
-            DatePicker("日付", selection: $date, displayedComponents: .date)
-                .datePickerStyle(WheelDatePickerStyle())
-
-            TextField("メモ", text: $memo)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-            TextField("金額", text: $amount)
-                .keyboardType(.numberPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-            Picker("カテゴリ", selection: $selectedCategory) {
-                ForEach(categories, id: \.self) { category in
-                    Text(category)
+        ZStack{
+            Color.offwhite
+                .edgesIgnoringSafeArea(.all)
+                .onTapGesture {
+                    // 画面をタップしたらキーボードを閉じる
+                    hideKeyboard()
                 }
-            }
-            .pickerStyle(MenuPickerStyle())
-
-            Picker("払った人", selection: $selectedPerson) {
-                ForEach(members, id: \.self) { person in
-                    Text(person)
+            VStack(spacing: 20) {
+                DatePicker("日付", selection: $date, displayedComponents: .date)
+                    .datePickerStyle(WheelDatePickerStyle())
+                
+                HStack{
+                    Picker("カテゴリ", selection: $selectedCategory) {
+                        ForEach(categories, id: \.self) { category in
+                            Text(category)
+                                .foregroundStyle(.black)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                    .padding(8)
+                    .background(Color.mint)
+                    .foregroundStyle(.black)
+                    .cornerRadius(10)
+                    TextField("金額", text: $amount)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Text("円")
                 }
-            }
-            .pickerStyle(MenuPickerStyle())
 
-            Picker("支払いの種類", selection: $paymentType) {
-                ForEach(paymentTypes, id: \.self) { type in
-                    Text(type)
+                Text("支払いの種類")
+                HStack {
+                    ForEach(paymentTypes, id: \.self) { pType in
+                        Button(action: {
+                            // ボタンが押されたら選択された人を変更
+                            paymentType = pType
+                        }) {
+                            Text(pType)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(paymentType == pType ? Color.mint : Color.gray.opacity(0.3))
+                                .foregroundColor(.black)
+                                .cornerRadius(10)
+                        }
+                    }
                 }
+                Text("払った人")
+                HStack {
+                    ForEach(members, id: \.self) { person in
+                        Button(action: {
+                            // ボタンが押されたら選択された人を変更
+                            selectedPerson = person
+                        }) {
+                            Text(person)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(selectedPerson == person ? Color.mint : Color.gray.opacity(0.3))
+                                .foregroundColor(.black)
+                                .cornerRadius(10)
+                        }
+                    }
+                }
+                
+                TextField("メモ", text: $memo)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                Button(action: {
+                    saveExpenseData()
+                }){
+                    ZStack {
+                        Color.pink
+                            .frame(width: 160, height: 60)
+                            .cornerRadius(10)
+                        Text("保存する")
+                            .font(.system(size: 25))
+                            .foregroundStyle(.white)
+                    }
+                }
+                Spacer()
             }
-            .pickerStyle(MenuPickerStyle())
-
-            Button("保存") {
-                saveExpenseData()
-            }
-            .buttonStyle(.borderedProminent)
-
-            Spacer()
+            .padding()
+            .navigationTitle("出費の追加")
+            .offset(y: -adjustedKeyboardOffset())
+            .animation(.easeOut, value: keyboardHeight)
         }
-        .padding()
-        .navigationTitle("出費の追加")
+        .onAppear {
+            startObservingKeyboard()
+        }
+        .onDisappear {
+            stopObservingKeyboard()
+        }
+    
     }
 
     private func saveExpenseData() {
@@ -96,5 +154,34 @@ struct AddExpenseView: View {
                 print("データ保存失敗")
             }
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
+    private func adjustedKeyboardOffset() -> CGFloat {
+            let screenHeight = UIScreen.main.bounds.height
+            return min(keyboardHeight, screenHeight * 0.1) // 高さの最大を画面の40%に制限
+        }
+    
+    private func startObservingKeyboard() {
+        let notificationCenter = NotificationCenter.default
+        keyboardPublisher = Publishers.Merge(
+            notificationCenter.publisher(for: UIResponder.keyboardWillShowNotification),
+            notificationCenter.publisher(for: UIResponder.keyboardWillHideNotification)
+        )
+        .compactMap { notification -> CGFloat? in
+            guard let userInfo = notification.userInfo,
+                  let endFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+                return nil
+            }
+            return notification.name == UIResponder.keyboardWillShowNotification ? endFrame.height : 0
+        }
+        .assign(to: \.keyboardHeight, on: self)
+    }
+
+    private func stopObservingKeyboard() {
+        keyboardPublisher?.cancel()
     }
 }
