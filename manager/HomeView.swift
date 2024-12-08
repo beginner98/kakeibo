@@ -11,8 +11,8 @@ extension Color {
 struct HomeView: View {
     @State private var isShowingAddExpenseView = false
     @State private var balanceText: String = "計算中..."
-    @State private var payfrom: String = "くわ"
-    @State private var payto: String = "はな"
+    @State private var payfrom: String = "太郎"
+    @State private var payto: String = "花子"
     
     @AppStorage("user1Name") private var user1Name: String = "Person 1"
     @AppStorage("user2Name") private var user2Name: String = "Person 2"
@@ -115,7 +115,7 @@ struct HomeView: View {
         // householdIDが空でないか確認
         guard !householdID.isEmpty else {
             DispatchQueue.main.async {
-                balanceText = "20000"
+                balanceText = "Error"
             }
             return
         }

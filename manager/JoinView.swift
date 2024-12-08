@@ -14,6 +14,7 @@ struct JoinView: View {
             VStack(spacing: 20) {
                 Spacer()
                 Text("家計簿に参加")
+                    .font(.largeTitle)
                 TextField("家計簿IDを入力", text: $householdID)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.none)
