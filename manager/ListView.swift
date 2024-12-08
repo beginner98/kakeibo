@@ -75,7 +75,7 @@ struct ListView: View {
                                     }) {
                                         Image(systemName:"pencil")
                                             .font(.system(size: 30))
-                                            .foregroundStyle(.blue)
+                                            .foregroundStyle(.yellow)
                                     }
                                 }
                             }
@@ -97,7 +97,6 @@ struct ListView: View {
                     })
                     .transition(.move(edge: .bottom)) // 下から上に表示される
                     .zIndex(1) // 編集画面を前面に表示
-                    .animation(.easeInOut) // アニメーション追加
                 }
             }
         }

@@ -31,9 +31,6 @@ struct OptionView: View {
             Color.gray
                 .ignoresSafeArea()
             VStack(spacing: 20) {
-                Text("オプション")
-                    .font(.largeTitle)
-                    .padding()
                 Text("利用中の家計簿ID")
                 Text(savedHouseholdID)
                 VStack(alignment: .leading, spacing: 15) {
