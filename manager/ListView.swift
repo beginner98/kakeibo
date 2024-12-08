@@ -88,15 +88,15 @@ struct ListView: View {
                     loadExpenses()
                 }
                 
-                // 編集用のモーダルビューを表示
+                // 編集用のビュー
                 if let editingExpense = editingExpense {
                     EditExpenseView(expense: editingExpense, onSave: { updatedExpense in
                         updateExpense(updatedExpense)
                     }, onCancel: {
                         self.editingExpense = nil
                     })
-                    .transition(.move(edge: .bottom)) // 下から上に表示される
-                    .zIndex(1) // 編集画面を前面に表示
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
                 }
             }
         }
@@ -106,7 +106,6 @@ struct ListView: View {
         guard !savedHouseholdID.isEmpty else { return }
         
         FirebaseManager.shared.getExpenses(forHouseholdID: savedHouseholdID) { fetchedExpenses in
-            // 日付でソート (昇順)
             let sortedExpenses = fetchedExpenses.sorted { $0.date > $1.date }
             expenses = sortedExpenses
         }
@@ -121,7 +120,7 @@ struct ListView: View {
                 if let index = expenses.firstIndex(where: { $0.id == updatedExpense.id }) {
                     expenses[index] = updatedExpense
                 }
-                self.editingExpense = nil // 編集を終了
+                self.editingExpense = nil
             }
         }
     }

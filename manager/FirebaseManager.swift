@@ -2,6 +2,7 @@ import FirebaseFirestore
 import FirebaseAuth
 import FirebaseStorage
 
+//Firebase関連の処理
 class FirebaseManager {
     static let shared = FirebaseManager()
     let db = Firestore.firestore()
@@ -30,7 +31,7 @@ class FirebaseManager {
         householdRef.setData([
             "householdID": id,
             "password": password,
-            "members": [userID] // 家計簿作成者を初期メンバーに追加
+            "members": [userID] 
         ]) { error in
             completion(error)
         }
@@ -84,7 +85,7 @@ class FirebaseManager {
             "person": person,
             "paymentType": paymentType,
             "userID": userID,
-            "imageData": imageData ?? Data() // 画像がない場合は空のData
+            "imageData": imageData ?? Data()
         ]
         // "Household" コレクション内の家計簿IDのドキュメントに保存
         db.collection("households").document(householdID).collection("expenses").addDocument(data: expenseData) { error in
@@ -119,18 +120,17 @@ class FirebaseManager {
                        let person = data["person"] as? String,
                        let amount = data["amount"] as? Int,
                        let paymentType = data["paymentType"] as? String,
-                       let category = data["category"] as? String, // 新しく追加された部分
-                       let memo = data["memo"] as? String { // 新しく追加された部分
-                        
-                        // categoryとmemoを追加したExpenseを作成
+                       let category = data["category"] as? String,
+                       let memo = data["memo"] as? String {
+    
                         let expense = Expense(
                             id: document.documentID,
                             date: date,
                             person: person,
                             amount: amount,
                             paymentType: paymentType,
-                            category: category,  // 追加
-                            memo: memo           // 追加
+                            category: category,
+                            memo: memo
                         )
                         expenses.append(expense)
                     }
