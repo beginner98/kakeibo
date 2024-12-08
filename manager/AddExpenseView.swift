@@ -49,8 +49,7 @@ struct AddExpenseView: View {
                     }
                     .pickerStyle(MenuPickerStyle())
                     .padding(8)
-                    .background(Color.mint)
-                    .foregroundStyle(.black)
+                    .background(Color.orange)
                     .cornerRadius(10)
                     TextField("金額", text: $amount)
                         .keyboardType(.numberPad)
@@ -68,7 +67,7 @@ struct AddExpenseView: View {
                             Text(pType)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(paymentType == pType ? Color.mint : Color.gray.opacity(0.3))
+                                .background(paymentType == pType ? Color.orange : Color.gray.opacity(0.3))
                                 .foregroundColor(.black)
                                 .cornerRadius(10)
                         }
@@ -84,7 +83,7 @@ struct AddExpenseView: View {
                             Text(person)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(selectedPerson == person ? Color.mint : Color.gray.opacity(0.3))
+                                .background(selectedPerson == person ? Color.orange  : Color.gray.opacity(0.3))
                                 .foregroundColor(.black)
                                 .cornerRadius(10)
                         }
@@ -98,12 +97,12 @@ struct AddExpenseView: View {
                     saveExpenseData()
                 }){
                     ZStack {
-                        Color.pink
+                        Color.yellow
                             .frame(width: 160, height: 60)
                             .cornerRadius(10)
                         Text("保存する")
                             .font(.system(size: 25))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.black)
                     }
                 }
                 Spacer()

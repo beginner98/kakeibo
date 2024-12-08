@@ -1,5 +1,13 @@
 import SwiftUI
-
+extension Color {
+    static let addButton = Color(red: 245/225, green: 218/225, blue: 138/225)
+}
+extension Color {
+    static let bookButton = Color(red:200/225, green: 200/225, blue: 200/225)
+}
+extension Color {
+    static let optionButton = Color(red:200/225, green: 200/225, blue: 200/225)
+}
 struct HomeView: View {
     @State private var isShowingAddExpenseView = false
     @State private var balanceText: String = "計算中..."
@@ -13,7 +21,7 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ZStack{
-                Color.mint
+                Color.gray
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
                     ZStack{
@@ -57,12 +65,12 @@ struct HomeView: View {
                         isShowingAddExpenseView = true
                     }) {
                         ZStack {
-                            Color.pink
+                            Color.yellow
                                 .frame(width: 320, height: 120)
                                 .cornerRadius(10)
                             Text("支出を追加/精算")
                                 .font(.system(size: 25))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.black)
                         }
                     }
                     .sheet(isPresented: $isShowingAddExpenseView) {
@@ -75,8 +83,8 @@ struct HomeView: View {
                                 .frame(width: 124, height: 80)
                                 .buttonStyle(.borderedProminent)
                                 .padding()
-                                .background(Color.gray)
-                                .foregroundStyle(.white)
+                                .background(Color.bookButton)
+                                .foregroundStyle(.black)
                                 .cornerRadius(10)
                         }
                         
@@ -86,8 +94,8 @@ struct HomeView: View {
                                 .frame(width: 124, height: 80)
                                 .buttonStyle(.borderedProminent)
                                 .padding()
-                                .background(Color.gray)
-                                .foregroundStyle(.white)
+                                .background(Color.optionButton)
+                                .foregroundStyle(.black)
                                 .cornerRadius(10)
                         }
                     }

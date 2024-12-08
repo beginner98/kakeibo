@@ -18,9 +18,10 @@ struct ListView: View {
     @State private var editingExpense: Expense? = nil
 
     var body: some View {
-        ZStack{
-            Color.gray
-            VStack {
+        ZStack {
+            Color.offwhite
+                .ignoresSafeArea()
+            VStack{
                 List(expenses, id: \.id) { expense in
                     VStack(alignment: .leading) {
                         HStack {
@@ -79,11 +80,9 @@ struct ListView: View {
                                 }
                             }
                             .padding(.top, 5)
-                            .foregroundColor(.gray)
                         }
                     }
                     .contentShape(Rectangle())
-                    .background(Color.offwhite)
                 }
                 .onAppear {
                     loadExpenses()
