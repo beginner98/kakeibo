@@ -9,8 +9,6 @@ struct OptionView: View {
     @State private var tempUser1Name: String = ""
     @State private var tempUser2Name: String = ""
     @State private var isExporting = false
-    @State private var showLogoutConfirmation = false
-    @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var activeAlert: ActiveAlert?
 
@@ -79,7 +77,7 @@ struct OptionView: View {
                                 } else {
                                     alertMessage = "名前の変更に失敗しました"
                                 }
-                                showAlert = true
+                                activeAlert = .nameChange(alertMessage)
                             }
                         }
                         .buttonStyle(.bordered)
@@ -99,9 +97,7 @@ struct OptionView: View {
                 .cornerRadius(10)
                 
                 Button("ログアウト") {
-                    print("ログアウト処理を開始します")
                     activeAlert = .logoutConfirmation
-                    print("showLogoutConfirmation: \(showLogoutConfirmation)")
                 }
                 .padding()
                 .foregroundStyle(Color.black)
@@ -220,6 +216,6 @@ struct OptionView: View {
 
 struct OptionView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView()
+        OptionView()
     }
 }

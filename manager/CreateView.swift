@@ -16,6 +16,7 @@ struct CreateView: View {
             VStack(spacing: 20) {
                 Spacer()
                 Text("家計簿を作成する")
+                    .font(.largeTitle)
                 // 家計簿IDの表示
                 Text("新規家計簿ID: \(householdID)")
                     .font(.headline)
