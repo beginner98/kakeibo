@@ -110,7 +110,7 @@ struct HomeView: View {
 
     /// 支払い金額の計算
     private func calculateBalances() {
-        balanceText = "計算中..." // 更新前に一旦メッセージをリセット
+        balanceText = "計算中..." 
 
         // householdIDが空でないか確認
         guard !householdID.isEmpty else {
