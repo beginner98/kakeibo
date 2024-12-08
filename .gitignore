@@ -1,4 +1,8 @@
 manager/GoogleService-Info.plist
 Pods/*
+<<<<<<< HEAD
 Podfile
 filtered-repo/*
+=======
+Podfile
+>>>>>>> 9c75a31a186f211eb266a98c6158c47406e80654

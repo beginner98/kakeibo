@@ -18,6 +18,10 @@ struct AddExpenseView: View {
     @AppStorage("user2Name") private var user2Name: String = "Person 2"
     let categories = ["食費", "交通費", "趣味", "その他"]
     let paymentTypes = ["割り勘", "立て替え", "精算"]
+<<<<<<< HEAD
+=======
+    // `members`は計算プロパティで定義
+>>>>>>> 9c75a31a186f211eb266a98c6158c47406e80654
     var members: [String] {
         [user1Name, user2Name]
     }
@@ -32,6 +36,10 @@ struct AddExpenseView: View {
             Color.offwhite
                 .edgesIgnoringSafeArea(.all)
                 .onTapGesture {
+<<<<<<< HEAD
+=======
+                    // 画面をタップしたらキーボードを閉じる
+>>>>>>> 9c75a31a186f211eb266a98c6158c47406e80654
                     hideKeyboard()
                 }
             VStack(spacing: 20) {
@@ -45,6 +53,10 @@ struct AddExpenseView: View {
                                 .foregroundStyle(.black)
                         }
                     }
+<<<<<<< HEAD
+=======
+                    .pickerStyle(MenuPickerStyle())
+>>>>>>> 9c75a31a186f211eb266a98c6158c47406e80654
                     .padding(8)
                     .background(Color.orange)
                     .cornerRadius(10)
