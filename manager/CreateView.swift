@@ -15,8 +15,8 @@ struct CreateView: View {
                 .ignoresSafeArea()
             VStack(spacing: 20) {
                 Spacer()
-                Text("家計簿を作成する")
-                    .font(.largeTitle)
+                Text("家計簿の作成")
+                    .font(.title)
                 Text("新規家計簿ID: \(householdID)")
                     .font(.headline)
                     .padding(.top)

@@ -8,6 +8,8 @@ struct JoinOrCreateView: View {
                     .ignoresSafeArea()
                 VStack(spacing: 20) {
                     Spacer()
+                    Text("ふたりの家計簿へようこそ！")
+                        .font(.title)
                     NavigationLink("招待された方はこちら") {
                         JoinView()
                     }
@@ -15,7 +17,7 @@ struct JoinOrCreateView: View {
                     .foregroundStyle(Color.black)
                     .background(Color.yellow)
                     .cornerRadius(10)
-                    Spacer()
+
                     NavigationLink("新しく始める方はこちら") {
                         CreateView()
                     }
