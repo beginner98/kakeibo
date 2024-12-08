@@ -10,46 +10,55 @@ struct CreateView: View {
     @AppStorage("householdID") private var savedHouseholdID = "" // 家計簿IDをAppStorageで保持
 
     var body: some View {
-        VStack(spacing: 20) {
-            // 家計簿IDの表示
-            Text("家計簿ID: \(householdID)")
-                .font(.headline)
-                .padding(.top)
-
-            // パスワード入力
-            SecureField("パスワード（8文字以上）", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            // 作成ボタン
-            Button("作成する") {
-                guard password.count >= 8 else {
-                    errorMessage = "パスワードは8文字以上にしてください"
-                    return
+        ZStack{
+            Color.gray
+                .ignoresSafeArea()
+            VStack(spacing: 20) {
+                Spacer()
+                Text("家計簿を作成する")
+                // 家計簿IDの表示
+                Text("新規家計簿ID: \(householdID)")
+                    .font(.headline)
+                    .padding(.top)
+                
+                // パスワード入力
+                SecureField("パスワードを設定（8文字以上）", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                // 作成ボタン
+                Button("作成する") {
+                    guard password.count >= 8 else {
+                        errorMessage = "パスワードは8文字以上にしてください"
+                        return
+                    }
+                    
+                    isLoading = true
+                    errorMessage = ""
+                    
+                    createHousehold()
                 }
-
-                isLoading = true
-                errorMessage = ""
-
-                createHousehold()
+                .disabled(password.count < 8 || isLoading)
+                .padding()
+                .foregroundStyle(Color.black)
+                .background(Color.yellow)
+                .cornerRadius(10)
+                
+                // ローディング表示
+                if isLoading {
+                    ProgressView()
+                }
+                
+                // エラーメッセージの表示
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                }
+                
+                Spacer()
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(password.count < 8 || isLoading)
-
-            // ローディング表示
-            if isLoading {
-                ProgressView()
-            }
-
-            // エラーメッセージの表示
-            if !errorMessage.isEmpty {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-            }
-
-            Spacer()
+            .padding()
+            .navigationTitle("家計簿の作成")
         }
-        .padding()
-        .navigationTitle("家計簿の作成")
     }
     
     /// 家計簿を作成する処理
@@ -90,5 +99,12 @@ struct CreateView: View {
         let data = Data(password.utf8)
         let hash = data.map { String(format: "%02x", $0) }.joined()
         return hash
+    }
+    
+}
+
+struct Create_Previews: PreviewProvider {
+    static var previews: some View {
+        CreateView()
     }
 }

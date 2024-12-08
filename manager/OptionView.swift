@@ -5,91 +5,132 @@ struct OptionView: View {
     @AppStorage("householdID") private var savedHouseholdID: String = ""
     @AppStorage("user1Name") private var user1Name: String = "Person 1"
     @AppStorage("user2Name") private var user2Name: String = "Person 2"
+    @AppStorage("isJoined") private var isJoined = false
     @State private var tempUser1Name: String = ""
     @State private var tempUser2Name: String = ""
     @State private var isExporting = false
     @State private var showLogoutConfirmation = false
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var activeAlert: ActiveAlert?
 
+    enum ActiveAlert: Identifiable {
+        case logoutConfirmation
+        case nameChange(String)
+
+        var id: String {
+            switch self {
+            case .logoutConfirmation:
+                return "logoutConfirmation"
+            case .nameChange(let message):
+                return "nameChange_\(message)"
+            }
+        }
+    }
+    
     var body: some View {
-        VStack(spacing: 20) {
-            Text("設定画面")
-                .font(.largeTitle)
+        ZStack{
+            Color.gray
+                .ignoresSafeArea()
+            VStack(spacing: 20) {
+                Text("オプション")
+                    .font(.largeTitle)
+                    .padding()
+                Text("利用中の家計簿ID")
+                Text(savedHouseholdID)
+                VStack(alignment: .leading, spacing: 15) {
+                    Text("名前の設定")
+                        .font(.headline)
+                    
+                    HStack {
+                        TextField("ユーザー①の名前", text: $tempUser1Name)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onAppear {
+                                tempUser1Name = user1Name
+                            }
+                        Button("変更") {
+                            updateName(oldName: user1Name, newName: tempUser1Name) { success in
+                                if success {
+                                    user1Name = tempUser1Name
+                                    alertMessage = "ユーザー①の名前を \(tempUser1Name) に変更しました"
+                                } else {
+                                    alertMessage = "名前の変更に失敗しました"
+                                }
+                                activeAlert = .nameChange(alertMessage)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .foregroundStyle(Color.black)
+                        .background(Color.yellow)
+                        .cornerRadius(5)
+                    }
+                    
+                    HStack {
+                        TextField("ユーザー②の名前", text: $tempUser2Name)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onAppear {
+                                tempUser2Name = user2Name
+                            }
+                        Button("変更") {
+                            updateName(oldName: user2Name, newName: tempUser2Name) { success in
+                                if success {
+                                    user2Name = tempUser2Name
+                                    alertMessage = "ユーザー②の名前を \(tempUser2Name) に変更しました"
+                                } else {
+                                    alertMessage = "名前の変更に失敗しました"
+                                }
+                                showAlert = true
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .foregroundStyle(Color.black)
+                        .background(Color.yellow)
+                        .cornerRadius(5)
+                    }
+                }
                 .padding()
-
-            VStack(alignment: .leading, spacing: 15) {
-                Text("名前の設定")
-                    .font(.headline)
                 
-                HStack {
-                    TextField("ユーザー①の名前", text: $tempUser1Name)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .onAppear {
-                            tempUser1Name = user1Name
-                        }
-                    Button("変更") {
-                        updateName(oldName: user1Name, newName: tempUser1Name) { success in
-                            if success {
-                                user1Name = tempUser1Name
-                                alertMessage = "ユーザー①の名前を \(tempUser1Name) に変更しました"
-                            } else {
-                                alertMessage = "名前の変更に失敗しました"
-                            }
-                            showAlert = true
-                        }
-                    }
-                    .buttonStyle(.bordered)
+                Button("支出データをエクスポート") {
+                    exportDataAsCSV()
                 }
-
-                HStack {
-                    TextField("ユーザー②の名前", text: $tempUser2Name)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .onAppear {
-                            tempUser2Name = user2Name
-                        }
-                    Button("変更") {
-                        updateName(oldName: user2Name, newName: tempUser2Name) { success in
-                            if success {
-                                user2Name = tempUser2Name
-                                alertMessage = "ユーザー②の名前を \(tempUser2Name) に変更しました"
-                            } else {
-                                alertMessage = "名前の変更に失敗しました"
-                            }
-                            showAlert = true
-                        }
-                    }
-                    .buttonStyle(.bordered)
+                .padding()
+                .foregroundStyle(Color.black)
+                .background(Color.yellow)
+                .cornerRadius(10)
+                
+                Button("ログアウト") {
+                    print("ログアウト処理を開始します")
+                    activeAlert = .logoutConfirmation
+                    print("showLogoutConfirmation: \(showLogoutConfirmation)")
                 }
+                .padding()
+                .foregroundStyle(Color.black)
+                .background(Color.pink)
+                .cornerRadius(10)
             }
-            .padding()
-
-            Button("支出データをエクスポート") {
-                exportDataAsCSV()
-            }
-            .buttonStyle(.borderedProminent)
-            .padding()
-
-            Button("ログアウト") {
-                showLogoutConfirmation = true
-            }
-            .buttonStyle(.borderedProminent)
-            .padding()
-            .alert(isPresented: $showLogoutConfirmation) {
-                Alert(
+        }
+        .alert(item: $activeAlert) { alert in
+            switch alert {
+            case .logoutConfirmation:
+                return Alert(
                     title: Text("確認"),
                     message: Text("ログアウトしますか？"),
                     primaryButton: .destructive(Text("ログアウト")) {
                         logout()
+                        isJoined = false
                     },
                     secondaryButton: .cancel()
                 )
+            case .nameChange(let message):
+                return Alert(
+                    title: Text("通知"),
+                    message: Text(message),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
-        .alert(isPresented: $showAlert) {
-            Alert(title: Text("通知"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-        }
     }
+    
 
     private func exportDataAsCSV() {
         FirebaseManager.shared.getExpenses(forHouseholdID: savedHouseholdID) { expenses in
@@ -174,5 +215,11 @@ struct OptionView: View {
         } catch {
             print("ログアウト失敗: \(error.localizedDescription)")
         }
+    }
+}
+
+struct OptionView_Previews: PreviewProvider {
+    static var previews: some View {
+        HomeView()
     }
 }
