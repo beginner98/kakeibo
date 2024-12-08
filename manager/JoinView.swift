@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseAuth
 
 struct JoinView: View {
     @State private var householdID = ""
@@ -28,13 +29,23 @@ struct JoinView: View {
                         errorMessage = "IDまたはパスワードを入力してください"
                         return
                     }
-                    
-                    FirebaseManager.shared.joinHousehold(id: householdID, password: password) { isSuccess in
-                        if isSuccess {
-                            savedHouseholdID = householdID // 家計簿IDを保存
-                            isJoined = true
-                        } else {
-                            errorMessage = "IDまたはパスワードが間違っています"
+
+                    // Firebase認証を実施
+                    Auth.auth().signIn(withEmail: "\(householdID)@shared-household.com", password: hashPassword(password)) { result, error in
+                        if let error = error {
+                            // エラーが発生した場合、エラーメッセージを表示
+                            errorMessage = "ログイン失敗: \(error.localizedDescription)"
+                            return
+                        }
+
+                        // ログイン成功後、joinHouseholdで追加のチェック
+                        FirebaseManager.shared.joinHousehold(id: householdID, password: password) { isSuccess in
+                            if isSuccess {
+                                savedHouseholdID = householdID // 家計簿IDを保存
+                                isJoined = true
+                            } else {
+                                errorMessage = "IDまたはパスワードが間違っています"
+                            }
                         }
                     }
                 }
@@ -53,6 +64,11 @@ struct JoinView: View {
             .padding()
             .navigationTitle("家計簿への参加")
         }
+    }
+    private func hashPassword(_ password: String) -> String {
+        let data = Data(password.utf8)
+        let hash = data.map { String(format: "%02x", $0) }.joined()
+        return hash
     }
 }
 

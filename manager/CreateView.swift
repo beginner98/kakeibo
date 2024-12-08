@@ -69,7 +69,6 @@ struct CreateView: View {
                 isLoading = false
                 return
             }
-
             // Firestoreに家計簿データを作成
             let householdData: [String: Any] = [
                 "householdID": String(householdID),
@@ -83,6 +82,13 @@ struct CreateView: View {
                     print("家計簿が正常に作成されました")
                     savedHouseholdID = String(householdID) // 家計簿IDを端末に保存
                     isJoined = true
+                }
+                Auth.auth().signIn(withEmail: email, password: hashedPassword) { result, error in
+                    if let error = error {
+                        // エラーが発生した場合、エラーメッセージを表示
+                        errorMessage = "ログイン失敗: \(error.localizedDescription)"
+                        return
+                    }
                 }
                 isLoading = false
             }

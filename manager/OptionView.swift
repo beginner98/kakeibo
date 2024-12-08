@@ -3,8 +3,8 @@ import FirebaseAuth
 
 struct OptionView: View {
     @AppStorage("householdID") private var savedHouseholdID: String = ""
-    @AppStorage("user1Name") private var user1Name: String = "Person 1"
-    @AppStorage("user2Name") private var user2Name: String = "Person 2"
+    @AppStorage("user1Name") private var user1Name: String = "太郎"
+    @AppStorage("user2Name") private var user2Name: String = "花子"
     @AppStorage("isJoined") private var isJoined = false
     @State private var tempUser1Name: String = ""
     @State private var tempUser2Name: String = ""
