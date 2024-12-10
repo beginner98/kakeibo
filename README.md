@@ -2,7 +2,7 @@
 
 # ふたりの家計簿
 手軽に使用できることに特化した二人用家計簿です。</br>
-firebaseを用いたデータ管理により、ユーザ間での操作が同期されます。</br>
+firebaseを用いたデータ管理により, ユーザ間での操作が同期されます。</br>
 <div style="display: flex; justify-content: space-between;">
   <img src="https://github.com/user-attachments/assets/c8a847e6-c033-4e26-b839-d56eb8c60250" width="22%" />
   <img src="https://github.com/user-attachments/assets/03771b96-c890-4708-979e-e874870fb4c4" width="22%" />
@@ -28,9 +28,13 @@ firebaseを用いたデータ管理により、ユーザ間での操作が同期
   + 登録した支出の編集
 + オプション画面
   + 使用中の家計簿IDの確認
-  + 名前の設定・変更（変更時には、履歴上の名前も置き換え）
+  + 名前の設定・変更（変更時には, 履歴上の名前も置き換え）
   + 支出履歴のcsvファイル出力
   + ログアウト
++ 家計簿作成画面
+  + 家計簿IDの生成, パスワードの設定
++ 家計簿への参加画面
+  + 家計簿ID, パスワードの入力で家計簿への参加
 
 # テスト
 + Xcode 16.1
